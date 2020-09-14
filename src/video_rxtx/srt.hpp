@@ -43,13 +43,12 @@
 #include <mutex>
 #include <srt/srt.h>
 #include <string>
-#include <string_view>
 #include <thread>
 
 #include "types.h"
 #include "video_rxtx.h"
 
-constexpr std::string_view SRT_LOOPBACK{"127.1.2.3"};
+#define SRT_LOOPBACK "127.1.2.3"
 
 struct video_frame;
 struct display;

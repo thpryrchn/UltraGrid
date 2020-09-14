@@ -1144,7 +1144,7 @@ int main(int argc, char *argv[])
         if (strcasecmp(video_protocol, "srt") == 0) {
                 video_rx_port = video_tx_port = port_base;
                 if (argc == 0) {
-                        requested_receiver = SRT_LOOPBACK.data();
+                        requested_receiver = SRT_LOOPBACK;
                 }
         }
 
