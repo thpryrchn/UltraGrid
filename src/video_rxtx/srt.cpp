@@ -48,6 +48,7 @@
 #include "rtp/rtp_types.h"
 #include "rtp/video_decoders.h"
 #include "transmit.h"
+#include "ug_runtime_error.hpp"
 #include "utils/net.h"
 #include "video_decompress.h"
 #include "video_display.h"
@@ -57,6 +58,7 @@
 
 constexpr const char *MOD_NAME = "[SRT] ";
 constexpr size_t MAX_BUFFER_LEN = 5'000'000;
+constexpr size_t ERR_MSG_BUF_LEN = 1024;
 
 using namespace std;
 
@@ -77,6 +79,8 @@ struct srt_decoder {
 srt_video_rxtx::srt_video_rxtx(map<string, param_u> const &params) :
         video_rxtx(params), m_decoder(make_unique<srt_decoder>())
 {
+        using namespace std::string_literals;
+
         string caller{params.at("receiver").str};
         int rx_port = params.at("rx_port").i;
         int tx_port = params.at("tx_port").i;
@@ -91,7 +95,11 @@ srt_video_rxtx::srt_video_rxtx(map<string, param_u> const &params) :
                 sa.sin_port = htons(rx_port);
                 sa.sin_addr.s_addr = INADDR_ANY;
                 int st = srt_bind(m_socket_listen, (struct sockaddr *) &sa, sizeof sa);
-                assert(st == 0);
+                if (st != 0) {
+                        array<char, ERR_MSG_BUF_LEN> err_buf{"Unknown error"};
+                        strerror_r(errno, err_buf.data(), err_buf.size());
+                        throw ug_runtime_error{"srt_bind: "s + err_buf.data()};
+                }
 
                 srt_listen(m_socket_listen, 5);
 
